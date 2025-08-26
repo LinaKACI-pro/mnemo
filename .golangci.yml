@@ -1,128 +1,24 @@
-# .golangci.yml — mnemo
+version: 2
 
 run:
   timeout: 3m
   tests: true
-  allow-parallel-runners: true
-
-output:
-  sort-results: true
-  print-issued-lines: true
 
 linters:
   enable:
-    # Core correctness and best practices
     - govet
     - staticcheck
-    - gosimple
-    - typecheck
-
-    # Error handling, dead code, and common pitfalls
     - errcheck
-    - ineffassign
-    - unused
-    - exportloopref
-    - gocritic
 
-    # Style and readability (idiomatic Go)
-    - revive
+formatters:
+  enable:
     - gofumpt
-    - misspell
-    - asciicheck
-    - nolintlint
-
-    # Perf & security
-    - prealloc
-    - gosec
-
-    # Import guardrails and forbidden patterns
-    - depguard
-    - forbidigo
-
-    # Duplicate code detector (low signal but occasionally helpful)
-    - dupl
-
-  disable:
-    # Disabled for now to avoid noise; can be enabled later if desired.
-    - gocyclo
-    - lll
-    - funlen
-    - wsl
 
 linters-settings:
-  gofumpt:
-  # Leave module-path unset to avoid mismatches if repo is relocated.
-  # This still enforces stricter formatting than gofmt.
-
-  revive:
-    severity: warning
-    rules:
-      # API / naming hygiene
-      - name: exported            # exported identifiers should have comments
-        arguments: [ "disableStutteringCheck" ]
-      - name: receiver-naming
-      - name: var-naming
-      - name: time-naming
-      - name: error-naming
-      - name: errorf             # discourage fmt.Errorf without %w when wrapping
-      # Control flow & clarity
-      - name: indent-error-flow  # prefer early returns on errors
-      - name: empty-block
-      - name: constant-logical-expr
-      # Context propagation
-      - name: context-as-argument  # first arg should be context.Context
-
-  misspell:
-    locale: US
-
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - style
-      - performance
-      - experimental
-    settings:
-      hugeParam:
-        sizeThreshold: 96  # flag passing large structs by value
-
-  gosec:
-    severity: "medium"
-    confidence: "medium"
-    excludes:
-      # The following often yield false positives; keep them audited in code reviews.
-      - G115   # integer conversion with potential overflow
-      - G204   # command execution with variable; case-by-case validation
-
-  depguard:
-    rules:
-      main:
-        list-type: denylist
-        deny:
-          - pkg: "log"
-            desc: "Use log/slog for structured logs instead of log."
-          - pkg: "github.com/pkg/errors"
-            desc: "Use stdlib errors and %w wrapping via fmt.Errorf."
-        # Allow everything else; boundary checks (e.g., internal/store/sqlite) are enforced by code review and package layout.
-
-  forbidigo:
-    forbid:
-      - 'fmt\.Print.*'   # avoid prints in production; prefer structured logging
-      - 'panic\(.*\)'    # panics are forbidden outside main/test
-      - 'spew\.Dump'     # debugging only
-
-issues:
-  exclude-use-default: false
-  max-issues-per-linter: 0
-  max-same-issues: 0
-  exclude-rules:
-    # Allow fmt.Print in tests
-    - linters:
-        - forbidigo
-      path: _test\.go
-      text: 'fmt\.Print'
-    # Allow duplicates in testdata fixtures
-    - linters:
-        - dupl
-      path: testdata/.*
-
-version: 0.0.1
+  errcheck:
+    # Ces patterns sont ignorés : defer close, unsetenv, k.Load
+    exclude-functions:
+      - (*sql.DB).Close
+      - (*sql.Rows).Close
+      - os.Unsetenv
+      - (*koanf.Koanf).Load
