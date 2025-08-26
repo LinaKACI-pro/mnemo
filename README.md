@@ -1,4 +1,5 @@
-# mnémo
+<img width="256" height="256" alt="b2533b59-86b2-47f3-b379-e292645e9902" src="https://github.com/user-attachments/assets/54abd3c6-756b-4cd9-a64f-d4cd6803ae51" />
+
 A local-first, privacy-friendly CLI to capture and search your shell history on Ubuntu/WSL (bash). Built in Go with SQLite + FTS5 for fast search
 ## Install
 
