@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -14,29 +13,6 @@ import (
 var version = "0.0.1"
 
 func main() {
-	cfg, err := config.Load()
-	if err != nil {
-		log.Fatalf("Error loading config: %s", err)
-	}
-
-	db, err := sqlite.New(cfg.DbDriver, cfg.DbPath)
-	if err != nil {
-		log.Fatalf("failed to init sqlite store: %v", err)
-	}
-	defer db.Close()
-
-	ctx := context.Background()
-
-	// Search
-	results, err := db.Search(ctx, "hello")
-	if err != nil {
-		log.Fatalf("search failed: %v", err)
-	}
-
-	for _, e := range results {
-		fmt.Printf("Found entry: %d - %s\n", e.ID, e.Value)
-	}
-
 	showVersion := flag.Bool("v", false, "show version")
 	flag.Parse()
 
@@ -44,6 +20,19 @@ func main() {
 		fmt.Println("mnemo version", version)
 		os.Exit(0)
 	}
+
+	// Load Config
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("Error loading config: %s", err)
+	}
+
+	// Initialize SQLite store
+	db, err := sqlite.New(cfg.DbDriver, cfg.DbPath)
+	if err != nil {
+		log.Fatalf("failed to init sqlite store: %v", err)
+	}
+	defer db.Close()
 
 	fmt.Println("Hello from mnemo!")
 }
